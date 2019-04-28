@@ -77,4 +77,25 @@ int sif_cmd_data(u32 cmd, const void *pkt, size_t pktsize,
 
 int sif_cmd(u32 cmd, const void *pkt, size_t pktsize);
 
+/*
+ * sif_cmd_payload - return payload of SIF command
+ * @header: SIF command header
+ *
+ * The size of the payload is max %CMD_PACKET_PAYLOAD_MAX bytes.
+ */
+#define sif_cmd_payload(header)						\
+	({								\
+		typecheck(const struct sif_cmd_header *, (header));	\
+		(void*)&(header)[1];					\
+	})
+
+/**
+ * typedef sif_cmd_cb - SIF command handler
+ * @header: SIF command header
+ * @arg: argument passed to sif_request_cmd()
+ */
+typedef void (*sif_cmd_cb)(const struct sif_cmd_header *header, void *arg);
+
+int sif_request_cmd(u32 cmd, sif_cmd_cb cb, void *arg);
+
 #endif /* __ASM_MACH_PS2_SIF_H */
