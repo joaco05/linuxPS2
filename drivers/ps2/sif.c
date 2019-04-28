@@ -568,6 +568,15 @@ int sif_request_cmd(u32 cmd, sif_cmd_cb cb, void *arg)
 }
 EXPORT_SYMBOL_GPL(sif_request_cmd);
 
+static void cmd_irq_relay(const struct sif_cmd_header *header, void *arg)
+{
+	const struct {
+		u32 irq;
+	} *packet = sif_cmd_payload(header);
+
+	intc_sif_irq(packet->irq);
+}
+
 static int iop_reset_arg(const char *arg)
 {
 	const size_t arglen = strlen(arg) + 1;
@@ -664,6 +673,7 @@ static int sif_request_cmds(void)
 		struct cmd_data *arg;
 	} cmds[] = {
 		{ SIF_CMD_WRITE_SREG, cmd_write_sreg, NULL },
+		{ SIF_CMD_IRQ_RELAY,  cmd_irq_relay,  NULL },
 
 		{ SIF_CMD_RPC_END,    cmd_rpc_end,    NULL },
 		{ SIF_CMD_RPC_BIND,   cmd_rpc_bind,   NULL },
