@@ -75,6 +75,8 @@ int sif_cmd_opt_data(u32 cmd, u32 opt, const void *pkt,
 int sif_cmd_data(u32 cmd, const void *pkt, size_t pktsize,
 	iop_addr_t dst, const void *src, size_t nbytes);
 
+int sif_cmd_opt(u32 cmd, u32 opt, const void *pkt, size_t pktsize);
+
 int sif_cmd(u32 cmd, const void *pkt, size_t pktsize);
 
 /*
