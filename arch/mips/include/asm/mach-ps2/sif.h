@@ -98,4 +98,15 @@ typedef void (*sif_cmd_cb)(const struct sif_cmd_header *header, void *arg);
 
 int sif_request_cmd(u32 cmd, sif_cmd_cb cb, void *arg);
 
+struct sif_rpc_client
+{
+	iop_addr_t server;
+	iop_addr_t server_buffer;
+
+	size_t client_size_max;
+	void *client_buffer;
+
+	struct completion done;
+};
+
 #endif /* __ASM_MACH_PS2_SIF_H */
