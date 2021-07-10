@@ -992,6 +992,45 @@ int iop_writel(const u32 data, const iop_addr_t addr)
 }
 EXPORT_SYMBOL_GPL(iop_writel);
 
+int iop_module_load_rom_arg(const char *filepath, const char *arg_)
+{
+	const char * const arg = arg_ ? arg_ : "";
+	const size_t arg_size = strlen(arg) + 1;
+	const size_t filepath_size = strlen(filepath) + 1;
+	struct {
+		u32 addr;
+		u32 arg_size;
+		char filepath[IOPMOD_MAX_PATH];
+		char arg[IOPMOD_MAX_ARG];
+	} load = {
+		.arg_size = arg_size
+	};
+	struct {
+		s32 status;
+		u32 modres;
+	} result;
+	int err;
+
+	if (arg_size >= sizeof(load.arg))
+		return -EOVERFLOW;
+	memcpy(load.arg, arg, arg_size);
+
+	if (filepath_size >= sizeof(load.filepath))
+		return -ENAMETOOLONG;
+	memcpy(load.filepath, filepath, filepath_size);
+
+	err = sif_rpc(&load_file_rpc_client, rpo_mod_load,
+		&load, sizeof(load), &result, sizeof(result));
+
+	return err < 0 ? err : result.status;
+}
+EXPORT_SYMBOL(iop_module_load_rom_arg);
+
+int iop_module_load_rom(const char *filepath)
+{
+	return iop_module_load_rom_arg(filepath, NULL);
+}
+EXPORT_SYMBOL(iop_module_load_rom);
 /**
  * cmd_printk - IOP module kernel log printk command
  * @header: SIF command header
@@ -1037,6 +1076,12 @@ static int __init iop_module_init(void)
 	err = sif_rpc_bind(&load_file_rpc_client, SIF_SID_LOAD_MODULE);
 	if (err < 0) {
 		pr_err("iop-module: Failed to bind load module with %d\n", err);
+		goto err_bind;
+	}
+
+	err = iop_module_load_rom("rom0:ADDDRV");
+	if (err < 0) {
+		printk(KERN_ERR "iop-module: Loading rom0:ADDDRV failed with err = %d\n", err);
 		goto err_bind;
 	}
 
