@@ -1332,11 +1332,13 @@ static void write_cb_tilecursor(struct ps2fb_par *par,
 	const struct fb_var_screeninfo *var,
 	const struct fb_tilecursor *cursor)
 {
+	static bool blink;
 	union package * const base_package = par->package.buffer;
 	union package *package = base_package;
 	const u32 tw = par->cb.tile.width;
 	const u32 th = par->cb.tile.height;
 	const u32 dy =
+		blink                                       ? 0 :
 		cursor->shape == FB_TILE_CURSOR_NONE        ? 0 :
 		cursor->shape == FB_TILE_CURSOR_UNDERLINE   ? 1 :
 		cursor->shape == FB_TILE_CURSOR_LOWER_THIRD ? th / 3 :
@@ -1352,6 +1354,8 @@ static void write_cb_tilecursor(struct ps2fb_par *par,
 		.draw = cursor->mode,
 		.fg_rgbaq = console_pseudo_palette(cursor->fg, par)
 	};
+
+	blink = !blink;
 
 	if (!gif_wait())
 		return;
