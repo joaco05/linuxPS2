@@ -389,8 +389,9 @@ static irqreturn_t sif0_dma_handler(int irq, void *dev_id)
 
 	if (header->packet_size < sizeof(*header) ||
 	    header->packet_size > SIF_CMD_PACKET_MAX) {
-		pr_err_once("sif: Invalid command header size %u bytes\n",
-			header->packet_size);
+		pr_err_once("sif: Invalid command header size %u bytes (data size %u addr %x cmd 0x%x opt 0x%x)\n",
+			header->packet_size, header->data_size,
+			header->data_addr, header->cmd, header->opt);
 		goto err;
 	}
 
